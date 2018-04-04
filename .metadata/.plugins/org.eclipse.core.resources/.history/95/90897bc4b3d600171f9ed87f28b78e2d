@@ -1,0 +1,65 @@
+package Filmbooking;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public class resvBean {
+
+	Connection conn = null;
+	PreparedStatement pstmt = null;
+	String jdbc_url = "jdbc:mysql://localhost/movie";
+	String jdbc_driver = "com.mysql.jdbc.Driver";
+
+	void connect() {
+		try {
+			Class.forName(jdbc_driver);
+
+			conn = DriverManager.getConnection(jdbc_url, "root", "1234");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	void disconnect() {
+		if (pstmt != null) {
+			try {
+				pstmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		if (conn != null) {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public boolean updateDB(resv book) {
+		connect();
+
+		String sql = "update resv set id_mem=?, id_film=?, film_name=?, date=?, resv_data=?, seat_no, status=?  where id_resv=?";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, movie.getFilm_name());
+			pstmt.setInt(2, movie.getAge_phase());
+			pstmt.setInt(3, movie.getSeat_num());
+			pstmt.setString(4, movie.getDate());
+			pstmt.setInt(5, movie.getId_film());
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			disconnect();
+		}
+		return true;
+	}
+
+}

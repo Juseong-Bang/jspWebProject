@@ -1,0 +1,239 @@
+package Filmbooking;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+public class seatBean {
+
+	Connection conn = null;
+	PreparedStatement pstmt = null;
+	String jdbc_url = "jdbc:mysql://localhost/film_booking";
+	String jdbc_driver = "com.mysql.jdbc.Driver";
+
+	void connect() {
+		try {
+			Class.forName(jdbc_driver);
+
+			conn = DriverManager.getConnection(jdbc_url, "root", "1234");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	void disconnect() {
+		if (pstmt != null) {
+			try {
+				pstmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		if (conn != null) {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public boolean updateDB(seat chair) {
+		connect();
+		String sql = "update seat set id_film=?,s1=?,s2=?,s3=?,s4=?,s5=?,s6=?,s7=?,s8=?,s9=?  where id_seat=?";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, chair.getId_film());
+			pstmt.setBoolean(2, chair.getSeat(0));
+			pstmt.setBoolean(3, chair.getSeat(1));
+			pstmt.setBoolean(4, chair.getSeat(2));
+			pstmt.setBoolean(5, chair.getSeat(3));
+			pstmt.setBoolean(6, chair.getSeat(4));
+			pstmt.setBoolean(7, chair.getSeat(5));
+			pstmt.setBoolean(8, chair.getSeat(6));
+			pstmt.setBoolean(9, chair.getSeat(7));
+			pstmt.setBoolean(10, chair.getSeat(8));
+			pstmt.setInt(11, chair.getId_seat());
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			disconnect();
+		}
+		return true;
+	}
+	public boolean updatePerson(int id_film,int seat_no) {
+		connect();
+		String sql = "update seat set s"+seat_no+"=?  where id_film=?";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setBoolean(1, false);
+			pstmt.setInt(2, id_film);
+			
+			pstmt.executeUpdate();
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			disconnect();
+		}
+		return true;
+	}
+
+	public boolean deleteDB(int gd_member) {
+		connect();
+
+		String sql = "delete from seat where id_seat=?";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, gd_member);
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			disconnect();
+		}
+		return true;
+	}
+
+	public boolean insertDB(seat chair) {
+		connect();
+
+		String sql = "insert into seat (id_seat, id_film,s1,s2,s3,s4,s5,s6,s7,s8,s9) values(default,?,?,?,?,?,?,?,?,?,?)";
+		try {
+			pstmt = conn.prepareStatement(sql);
+
+			pstmt.setInt(1, chair.getId_film());
+			pstmt.setBoolean(2, chair.getSeat(0));
+			pstmt.setBoolean(3, chair.getSeat(1));
+			pstmt.setBoolean(4, chair.getSeat(2));
+			pstmt.setBoolean(5, chair.getSeat(3));
+			pstmt.setBoolean(6, chair.getSeat(4));
+			pstmt.setBoolean(7, chair.getSeat(5));
+			pstmt.setBoolean(8, chair.getSeat(6));
+			pstmt.setBoolean(9, chair.getSeat(7));
+			pstmt.setBoolean(10, chair.getSeat(8));
+
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			disconnect();
+		}
+		return true;
+	}
+
+	public seat getDB(int gd_member) {
+		connect();
+
+		String sql = "select * from seat where id_seat=?";
+		seat chair = new seat();
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, gd_member);
+			ResultSet rs = pstmt.executeQuery();
+
+			rs.next();
+
+			chair.setId_film(rs.getInt("id_film"));
+			chair.setId_seat(rs.getInt("id_seat"));
+			chair.setSeat(0, rs.getBoolean("s1"));
+			chair.setSeat(1, rs.getBoolean("s2"));
+			chair.setSeat(2, rs.getBoolean("s3"));
+			chair.setSeat(3, rs.getBoolean("s4"));
+			chair.setSeat(4, rs.getBoolean("s5"));
+			chair.setSeat(5, rs.getBoolean("s6"));
+			chair.setSeat(6, rs.getBoolean("s7"));
+			chair.setSeat(7, rs.getBoolean("s8"));
+			chair.setSeat(8, rs.getBoolean("s9"));
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			disconnect();
+		}
+		return chair;
+	}
+
+	public seat getChair(int id_film) {
+		connect();
+
+		String sql = "select * from seat where id_film=?";
+		seat chair = new seat();
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, id_film);
+			ResultSet rs = pstmt.executeQuery();
+
+			rs.next();
+
+			chair.setId_film(rs.getInt("id_film"));
+			chair.setId_seat(rs.getInt("id_seat"));
+			chair.setSeat(0, rs.getBoolean("s1"));
+			chair.setSeat(1, rs.getBoolean("s2"));
+			chair.setSeat(2, rs.getBoolean("s3"));
+			chair.setSeat(3, rs.getBoolean("s4"));
+			chair.setSeat(4, rs.getBoolean("s5"));
+			chair.setSeat(5, rs.getBoolean("s6"));
+			chair.setSeat(6, rs.getBoolean("s7"));
+			chair.setSeat(7, rs.getBoolean("s8"));
+			chair.setSeat(8, rs.getBoolean("s9"));
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			disconnect();
+		}
+		return chair;
+	}
+
+	public ArrayList<seat> getDBList() {
+		connect();
+
+		ArrayList<seat> seat_list = new ArrayList<seat>();
+
+		String sql = "select * from seat order by id_seat asc";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+
+				seat chair = new seat();
+
+				chair.setId_seat(rs.getInt("id_seat"));
+				chair.setId_film(rs.getInt("id_film"));
+				chair.setSeat(0, rs.getBoolean("s1"));
+				chair.setSeat(1, rs.getBoolean("s2"));
+				chair.setSeat(2, rs.getBoolean("s3"));
+				chair.setSeat(3, rs.getBoolean("s4"));
+				chair.setSeat(4, rs.getBoolean("s5"));
+				chair.setSeat(5, rs.getBoolean("s6"));
+				chair.setSeat(6, rs.getBoolean("s7"));
+				chair.setSeat(7, rs.getBoolean("s8"));
+				chair.setSeat(8, rs.getBoolean("s9"));
+
+				seat_list.add(chair);
+			}
+			rs.close();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			disconnect();
+		}
+		return seat_list;
+	}
+}

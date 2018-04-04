@@ -1,0 +1,173 @@
+package Filmbooking;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+public class resvBean {
+
+	Connection conn = null;
+	PreparedStatement pstmt = null;
+	String jdbc_url = "jdbc:mysql://localhost/movie";
+	String jdbc_driver = "com.mysql.jdbc.Driver";
+
+	void connect() {
+		try {
+			Class.forName(jdbc_driver);
+
+			conn = DriverManager.getConnection(jdbc_url, "root", "1234");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	void disconnect() {
+		if (pstmt != null) {
+			try {
+				pstmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		if (conn != null) {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public boolean updateDB(resv book) {
+		connect();
+
+		String sql = "update resv set id_mem=?, id_film=?, film_name=?, date=?, resv_date=?, seat_no=?, status=?  where id_resv=?";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, book.getId_mem());
+			pstmt.setInt(2, book.getId_film());
+			pstmt.setString(3, book.getFilm_name());
+			pstmt.setString(4, book.getDate());
+			pstmt.setString(5, book.getResv_date());
+			pstmt.setInt(6, book.getSeat_no());
+			pstmt.setBoolean(7, book.isStatus());
+			pstmt.setInt(8, book.getId_resv());
+
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			disconnect();
+		}
+		return true;
+	}
+
+	public boolean deleteDB(int resv_num) {
+		connect();
+
+		String sql = "delete from resv where id_resv=?";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, resv_num);
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			disconnect();
+		}
+		return true;
+	}
+
+	public boolean insertDB(resv book) {
+		connect();
+
+		String sql = "insert resv set id_mem=?, id_film=?, film_name=?, date=?, resv_date=?, seat_no=?, status=? , id_resv=default";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, book.getId_mem());
+			pstmt.setInt(2, book.getId_film());
+			pstmt.setString(3, book.getFilm_name());
+			pstmt.setString(4, book.getDate());
+			pstmt.setString(5, book.getResv_date());
+			pstmt.setInt(6, book.getSeat_no());
+			pstmt.setBoolean(7, book.isStatus());
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			disconnect();
+		}
+		return true;
+	}
+
+	public resv getDB(int gd_resv) {
+		connect();
+
+		String sql = "select * from resv where id_resv=?";
+		resv book = new resv();
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, gd_resv);
+			ResultSet rs = pstmt.executeQuery();
+
+			rs.next();
+			book.setId_resv(rs.getInt("id_resv"));
+			book.setId_mem(rs.getInt("id_mem"));
+			book.setId_film(rs.getInt("id_film"));
+			book.setFilm_name(rs.getString("film_name"));
+			book.setDate(rs.getString("date"));
+			book.setResv_date(rs.getString("resv_date"));
+			book.setSeat_no(rs.getInt("seat_no"));
+			book.setStatus(rs.getBoolean("status"));
+
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			disconnect();
+		}
+		return book;
+	}
+
+
+	public ArrayList<resv> getDBList() {
+		connect();
+
+		ArrayList<resv> book_list = new ArrayList<resv>();
+
+		String sql = "select * from resv order by id_resv asc";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				resv book = new resv();
+				book.setId_resv(rs.getInt("id_resv"));
+				book.setId_mem(rs.getInt("id_mem"));
+				book.setId_film(rs.getInt("id_film"));
+				book.setFilm_name(rs.getString("film_name"));
+				book.setDate(rs.getString("date"));
+				book.setResv_date(rs.getString("resv_date"));
+				book.setSeat_no(rs.getInt("seat_no"));
+				book.setStatus(rs.getBoolean("status"));
+
+				book_list.add(book);
+			}
+			rs.close();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			disconnect();
+		}
+		return book_list;
+	}
+}

@@ -1,0 +1,12 @@
+package Filmbooking;
+
+public class film_list {
+	
+	Connection conn=null;
+	PreparedStatement pstm=null;
+	String jdbc_url="jdbc:mysql://localhost/movie";
+
+		Class.forName("com.mysql.jdbc.Driver");
+		conn=DriverManager.getConnection(jdbc_url,"root","1234");
+
+}

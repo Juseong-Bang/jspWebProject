@@ -1,0 +1,57 @@
+<%@page import="Filmbooking.*"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<jsp:useBean id="seat_list" scope="application"
+	class="Filmbooking.seatBean" />
+<jsp:getProperty property="*" name="seat_list" />
+<title>예매</title>
+</head>
+<body>
+	<div align="center">
+		<h3>영화 예매</h3>
+		<hr>
+		<table>
+			<tr>
+				<td>좌석 번호
+				<td width=50></td>
+				<td>좌석 현황
+				<td width=50></td>
+				<td>예매
+				<td width=50></td>
+			</tr>
+			<%
+				int i = 1;
+				seat chair = seat_list.getChair(Integer.parseInt(request.getParameter("select")));
+				for (boolean state : chair.getS()) {
+			%>
+			<tr>
+				<%=i%>
+			</tr>
+			<tr>
+				<%
+					if (state)
+							out.print("예매 불가");
+						else
+							out.print("예매 가능");
+				%>
+			</tr>
+			<tr>
+				<%
+					if (!state)
+				%>
+				<form method="post" action="pay.jsp">
+					<input type="hidden" name="member" value="main" /> <input
+						type="hidden" name="seat" value="<%=i%>" /> />
+				</form>
+				<%
+					}
+				%>
+			
+		</table>
+	</div>
+</body>
+</html>

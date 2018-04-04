@@ -1,0 +1,160 @@
+package Filmbooking;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+public class memberBean {
+
+	Connection conn = null;
+	PreparedStatement pstmt = null;
+	String jdbc_url = "jdbc:mysql://localhost/member";
+	String jdbc_driver = "com.mysql.jdbc.Driver";
+
+	void connect() {
+		try {
+			Class.forName(jdbc_driver);
+
+			conn = DriverManager.getConnection(jdbc_url, "root", "1234");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	void disconnect() {
+		if (pstmt != null) {
+			try {
+				pstmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		if (conn != null) {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public boolean updateDB(member person) {
+		connect();
+		String sql = "update member set name_mem=?, age_mem=?, password=?, register_date=?  where id_mem=?";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, person.getName_mem());
+			pstmt.setInt(2, person.getAge_mem());
+			pstmt.setString(3, person.getPassword());
+			pstmt.setString(4, person.getRegister_date());
+			pstmt.setInt(5, person.getId_mem());
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			disconnect();
+		}
+		return true;
+	}
+
+	public boolean deleteDB(int gd_member) {
+		connect();
+
+		String sql = "delete from member where id_mem=?";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, gd_member);
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			disconnect();
+		}
+		return true;
+	}
+
+	public boolean insertDB(member person) {
+		connect();
+
+		String sql = "insert into member(id_mem, name_mam, age_mem, password, register_date) values(default,?,?,?,?)";
+		try {
+
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, person.getName_mem());
+			pstmt.setInt(2, person.getAge_mem());
+			pstmt.setString(3, person.getPassword());
+			pstmt.setString(4, person.getRegister_date());
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			disconnect();
+		}
+		return true;
+	}
+
+	public member getDB(int gd_member) {
+		connect();
+
+		String sql = "select * from member where id_mem=?";
+		member person = new member();
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, gd_member);
+			ResultSet rs = pstmt.executeQuery();
+
+			rs.next();
+			person.setId_mem(rs.getInt("id_mem"));
+			person.setName_mem(rs.getString("name_mem"));
+			person.setAge_mem(rs.getInt("age_mem"));
+			person.setPassword(rs.getString("password"));
+			person.setRegister_date(rs.getString("register_date"));
+
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			disconnect();
+		}
+		return person;
+	}
+
+	public ArrayList<member> getDBList() {
+		connect();
+
+		ArrayList<member> person_list = new ArrayList<member>();
+
+		String sql = "select * from member order by id_mem asc";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				member person = new member();
+				person.setId_mem(rs.getInt("id_mem"));
+				person.setName_mem(rs.getString("name_mem"));
+				System.out.println("in:" + rs.getString("name_mem") + " id_mem:" + rs.getInt("id_mem"));
+				person.setAge_mem(rs.getInt("age_mem"));
+				person.setPassword(rs.getString("password"));
+				person.setRegister_date(rs.getString("register_date"));
+
+				person_list.add(person);
+			}
+			rs.close();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			disconnect();
+		}
+		return person_list;
+	}
+}

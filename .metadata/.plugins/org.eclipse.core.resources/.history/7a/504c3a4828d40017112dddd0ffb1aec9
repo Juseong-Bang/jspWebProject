@@ -1,0 +1,166 @@
+package filmbooking;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+public class memberBean {
+	
+	Connection conn=null;
+	PreparedStatement pstmt=null;
+	String jdbc_url="jdbc:mysql://localhost/person";
+	String jdbc_driver="com.mysql.jdbc.Driver";
+		
+	void connect() {
+		try {
+			Class.forName(jdbc_driver);
+
+			conn = DriverManager.getConnection(jdbc_url,"root","1234");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	void disconnect() {
+		if(pstmt != null) {
+			try {
+				pstmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} 
+		if(conn != null) {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	public boolean updateDB(member person) {
+		connect();
+
+		System.out.println("0");
+		String sql ="update member set member_name=?, age_phase=?, seat_num=?, date=? where id_member=?";		
+		 
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1,person.getmember_name());
+			pstmt.setInt(2,person.getAge_phase());
+			pstmt.setInt(3,person.getSeat_num());
+			pstmt.setString(4,person.getDate());
+			pstmt.setInt(5,person.getId_member());	
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+		finally {
+			disconnect();
+		}
+		return true;
+	}
+	
+	public boolean deleteDB(int gd_member) {
+		connect();
+
+		System.out.println("1");
+		String sql ="delete from member where id_member=?";
+		
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1,gd_member);
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+		finally {
+			disconnect();
+		}
+		return true;
+	}
+	
+	public boolean insertDB(member person) {
+		connect();
+
+		String sql ="insert into member values(default,?,?,?,?)";
+		try {
+			
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1,person.getmember_name());
+			pstmt.setInt(2,person.getAge_phase());
+			pstmt.setInt(3,person.getSeat_num());
+			pstmt.setString(4,person.getDate());
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+		finally {
+			disconnect();
+		}
+		return true;
+	}
+	public member getDB(int gd_member) {
+		connect();
+		
+		String sql = "select * from member where id_member=?";
+		member person = new member();
+		
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1,gd_member);
+			ResultSet rs = pstmt.executeQuery();
+			
+			rs.next();
+			person.setId_member(rs.getInt("id_member"));
+			person.setmember_name(rs.getString("member_name"));
+			person.setAge_phase(rs.getInt("age_phase"));
+			person.setSeat_num(rs.getInt("seat_num"));
+			person.setDate(rs.getString("date"));
+			
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			disconnect();
+		}
+		return person;
+	}
+	public ArrayList<member> getDBList() {
+		connect();
+
+		
+		ArrayList<member> person_list = new ArrayList<member>();
+		
+		String sql = "select * from member order by id_member asc";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			ResultSet rs = pstmt.executeQuery();
+			while(rs.next()) {
+				member person = new member();
+				person.setId_member(rs.getInt("id_member"));
+				person.setmember_name(rs.getString("member_name"));
+				System.out.println("in:"+rs.getString("member_name")+" id_member:"+rs.getInt("id_member"));
+				person.setAge_phase(rs.getInt("age_phase"));
+				person.setSeat_num(rs.getInt("seat_num"));
+				person.setDate(rs.getString("date"));
+				
+				person_list.add(person);
+			}
+			rs.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			disconnect();
+		}
+		return person_list;
+	}
+}

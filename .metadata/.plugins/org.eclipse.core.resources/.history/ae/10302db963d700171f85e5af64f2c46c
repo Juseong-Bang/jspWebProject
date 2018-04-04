@@ -1,0 +1,184 @@
+<%@page import="java.util.ArrayList"%>
+<%@page import="Filmbooking.*"%>
+<%@page import="java.util.*, java.text.*"%>
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<jsp:useBean id="film_list" scope="application"
+	class="Filmbooking.filmBean" />
+<jsp:useBean id="movie" scope="page" class="Filmbooking.film" />
+<jsp:useBean id="chair" scope="page" class="Filmbooking.seat" />
+<jsp:useBean id="book" scope="page" class="Filmbooking.resv" />
+
+<jsp:useBean id="seat_list" scope="application"
+	class="Filmbooking.seatBean" />
+<jsp:useBean id="person" scope="session" class="Filmbooking.member" />
+<jsp:useBean id="member_list" scope="application"
+	class="Filmbooking.memberBean" />
+<jsp:setProperty name="member_list" property="*" />
+<jsp:useBean id="resv_list" scope="application"
+	class="Filmbooking.resvBean" />
+
+<jsp:setProperty name="resv_list" property="*" />
+<%
+	request.setCharacterEncoding("utf-8");
+
+	String action = request.getParameter("action");
+	if (action.equals("film") && action != null) {
+		String oper = request.getParameter("film");
+		if (oper.equals("insert")) {
+			movie.setFilm_name(request.getParameter("film_name"));
+			movie.setAge_phase(Integer.parseInt(request.getParameter("age_phase")));
+			movie.setDate(request.getParameter("date"));
+			movie.setSeat_num(Integer.parseInt(request.getParameter("seat_num")));
+			film_list.insertDB(movie);
+			chair.setId_film(film_list.getFilm(request.getParameter("film_name")).getId_film());
+			for (int i = movie.getSeat_num(); i < 9; i++) {
+				chair.setSeat(i, true);
+			}
+			seat_list.insertDB(chair);
+			response.sendRedirect("af_list.jsp");
+		} else if (oper.equals("remove")) {
+			film_list.deleteDB(Integer.parseInt(request.getParameter("rm_Id")));
+			seat_list
+					.deleteDB(seat_list.getChair(Integer.parseInt(request.getParameter("rm_Id"))).getId_seat());
+			resv_list.deleteMovie(Integer.parseInt(request.getParameter("rm_Id")));
+			response.sendRedirect("af_list.jsp");
+		}
+	} else if (action.equals("member") && action != null) {
+
+		String oper = request.getParameter("member");
+		if (oper.equals("main")) {
+			session.setAttribute("select", request.getParameter("select"));
+
+			if (person.getName_mem() == null) {
+%>
+<jsp:forward page="login.jsp" />
+<%
+	} else {
+				System.out.print(person.getName_mem());
+%>
+<jsp:forward page="seat.jsp" />
+<%
+	}
+		} else if (oper.equals("regist")) {
+			if (request.getParameter("name_mem").equals("") || request.getParameter("password1").equals("")
+					|| request.getParameter("password2").equals("")
+					|| request.getParameter("age_mem").equals("")) {
+				out.println("<script type='text/javascript'>alert('input all vlaue');history.back();</script>");
+				return;
+			}
+			for (member tem : member_list.getDBList()) {
+				if (request.getParameter("name_mem").equals(tem.getName_mem())) {
+					out.println("<script type='text/javascript'>alert('exist ID');history.back();</script>");
+					return;
+				}
+			}
+			if (!request.getParameter("password1").equals(request.getParameter("password2"))) {
+				out.println("<script type='text/javascript'>alert('unmatched pwd');history.back();</script>");
+				return;
+			} else {
+				person.setName_mem(request.getParameter("name_mem"));
+				person.setPassword(request.getParameter("password1"));
+				person.setAge_mem(Integer.parseInt(request.getParameter("age_mem")));
+				java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("yyyy.MM");
+				String today = formatter.format(new java.util.Date());
+				person.setRegister_date(today);
+				member_list.insertDB(person);
+				session.setAttribute("person", member_list.getPerson(request.getParameter("name_mem")));
+				if (session.getAttribute("select") != null) {
+%>
+<jsp:forward page="seat.jsp" />
+<%
+	} else {
+%>
+<jsp:forward page="film_list.jsp" />
+<%
+	}
+
+			}
+		} else if (oper.equals("login")) {
+
+			if (request.getParameter("name_mem").equals("admin")
+					&& request.getParameter("password").equals("admin")) {
+%>
+<jsp:forward page="af_list.jsp" />
+<%
+	}
+			for (member tem : member_list.getDBList()) {
+				if (request.getParameter("name_mem").equals(tem.getName_mem())
+						&& request.getParameter("password").equals(tem.getPassword())) {
+					session.setAttribute("person", member_list.getPerson(request.getParameter("name_mem")));
+					System.out.println("id:" + person.getId_mem() + "person name:" + person.getName_mem());
+%>
+<jsp:forward page="seat.jsp" />
+<%
+	return;
+				}
+			}
+			out.println(
+					"<script type='text/javascript'>alert('non member or wrong password');history.back();</script>");
+			return;
+		} else if (oper.equals("logout")) {
+			session.removeAttribute("person");
+			session.removeAttribute("select");
+			response.sendRedirect("film_list.jsp");
+		} else if (oper.equals("remove")) {//사람 지우면 
+			{
+
+				int id = Integer.parseInt(request.getParameter("rm_Id"));
+
+				for (resv temp : resv_list.getDBList()) {
+					if (temp.getId_mem() == id) {
+						seat_list.updatePerson(id, temp.getSeat_no() + 1);
+					}
+				}
+				resv_list.deletePerson(id);
+				member_list.deleteDB(id);
+				response.sendRedirect("am_list.jsp");
+			}
+
+		}
+	} else if (action.equals("resv")) {
+		String oper = request.getParameter("oper");
+		if (oper.equals("add")) {
+
+			chair = seat_list.getChair(Integer.parseInt(session.getAttribute("select").toString()));
+			chair.setSeat(Integer.parseInt(request.getParameter("number")), true);
+			seat_list.updateDB(chair);
+
+			movie = film_list.getDB(chair.getId_film());
+			book.setId_mem(person.getId_mem());
+			book.setId_film(chair.getId_film());
+			book.setFilm_name(movie.getFilm_name());
+			book.setDate(movie.getDate());
+			java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("yyyy.MM");
+			String today = formatter.format(new java.util.Date());
+			book.setResv_date(today);
+			book.setSeat_no(Integer.parseInt(request.getParameter("number")));
+			resv_list.insertDB(book);
+%>
+<jsp:forward page="pay.jsp" />
+<%
+	} else if (oper.equals("pay")) {
+			book = resv_list.getDB(Integer.parseInt(request.getParameter("rid")));
+			book.setStatus(true);
+			resv_list.updateDB(book);
+%>
+<jsp:forward page="pay.jsp" />
+<%
+	} else if (oper.equals("cancel")) {
+			book = resv_list.getDB(Integer.parseInt(request.getParameter("rid")));
+			chair = seat_list.getChair(book.getId_film());
+			chair.setSeat(book.getSeat_no(), false);
+			seat_list.updateDB(chair);
+			resv_list.deleteDB(book.getId_resv());
+%>
+<jsp:forward page="pay.jsp" />
+<%
+	}
+
+	}
+%>

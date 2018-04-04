@@ -1,0 +1,12 @@
+127.0.0.1 - - [25/Nov/2017:21:51:46 +0900] "GET / HTTP/1.1" 404 951
+0:0:0:0:0:0:0:1 - - [25/Nov/2017:21:51:49 +0900] "GET /FilmBooking/film_list.jsp HTTP/1.1" 200 449
+0:0:0:0:0:0:0:1 - - [25/Nov/2017:21:52:53 +0900] "GET /FilmBooking/film_list.jsp HTTP/1.1" 200 475
+0:0:0:0:0:0:0:1 - - [25/Nov/2017:21:53:29 +0900] "GET /FilmBooking/film_list.jsp HTTP/1.1" 200 462
+0:0:0:0:0:0:0:1 - - [25/Nov/2017:21:57:10 +0900] "GET /FilmBooking/film_list.jsp HTTP/1.1" 200 537
+0:0:0:0:0:0:0:1 - - [25/Nov/2017:22:13:59 +0900] "GET /FilmBooking/login.jsp HTTP/1.1" 200 515
+0:0:0:0:0:0:0:1 - - [25/Nov/2017:22:15:05 +0900] "GET /FilmBooking/login.jsp HTTP/1.1" 200 551
+0:0:0:0:0:0:0:1 - - [25/Nov/2017:22:16:24 +0900] "GET /FilmBooking/login.jsp HTTP/1.1" 200 571
+0:0:0:0:0:0:0:1 - - [25/Nov/2017:22:16:59 +0900] "GET /FilmBooking/login.jsp HTTP/1.1" 200 571
+0:0:0:0:0:0:0:1 - - [25/Nov/2017:22:18:15 +0900] "GET /FilmBooking/film_list.jsp HTTP/1.1" 200 555
+0:0:0:0:0:0:0:1 - - [25/Nov/2017:22:20:30 +0900] "GET /FilmBooking/register.jsp HTTP/1.1" 200 760
+0:0:0:0:0:0:0:1 - - [25/Nov/2017:22:27:11 +0900] "GET /FilmBooking/resv.jsp HTTP/1.1" 200 447
